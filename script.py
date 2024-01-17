@@ -1,6 +1,7 @@
 import requests
 import pandas as pd
 import re 
+
 df = pd.read_csv("TG-Automobil.txt", encoding='cp1252',sep='\t', on_bad_lines="skip" )
 prepdf = df.loc[df['01 Fahrzeugart'].str.contains('PERSONENWAGEN'),:]
 prepdf = df.loc[:,['Typengenehmigungsnummer','70 Reifen Felgen','69 Reifen Felgen','71 Reifen Felgen','54 Achsgarantie v von',
@@ -33,6 +34,9 @@ nesteddf = pd.DataFrame({'tgcode':tgcodes, 'tyres':tyres, 'rims':rims, 'axis':ax
 tgdf = nesteddf.explode('rims')
 tgdf.rims = tgdf.rims.str.get(0)
 tgdf = tgdf.explode('axis')
+tgdf.tyres = tgdf.tyres.str.replace(r'\s{2,}',r' ', regex = True).str.strip()
+tgdf.rims = tgdf.rims.str.replace(r'\s{2,}',r' ', regex = True).str.strip()
 tgdf = tgdf[~tgdf['tyres'].isnull()].drop_duplicates()
+
 
 tgdf.to_csv('tgdata.csv',index = False, sep = ';')
